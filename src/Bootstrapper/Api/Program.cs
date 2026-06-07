@@ -1,4 +1,6 @@
 
+using Payment;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, config) =>
@@ -10,12 +12,13 @@ builder.Host.UseSerilog((context, config) =>
 var catalogAssembly = typeof(CatalogModule).Assembly;
 var basketAssembly = typeof(BasketModule).Assembly;
 var orderingAssembly = typeof(OrderingModule).Assembly;
+var paymentAssembly = typeof(PaymentModule).Assembly;
 
 builder.Services
-    .AddCarterWithAssemblies(catalogAssembly, basketAssembly, orderingAssembly);
+    .AddCarterWithAssemblies(catalogAssembly, basketAssembly, orderingAssembly, paymentAssembly);
 
 builder.Services
-    .AddMediatRWithAssemblies(catalogAssembly, basketAssembly, orderingAssembly);
+    .AddMediatRWithAssemblies(catalogAssembly, basketAssembly, orderingAssembly, paymentAssembly);
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -23,7 +26,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 builder.Services
-    .AddMassTransitWithAssemblies(builder.Configuration, catalogAssembly, basketAssembly, orderingAssembly);
+    .AddMassTransitWithAssemblies(builder.Configuration, catalogAssembly, basketAssembly, orderingAssembly, paymentAssembly);
 
 builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
@@ -32,7 +35,9 @@ builder.Services.AddAuthorization();
 builder.Services
     .AddCatalogModule(builder.Configuration)
     .AddBasketModule(builder.Configuration)
-    .AddOrderingModule(builder.Configuration);
+    .AddOrderingModule(builder.Configuration)
+    .AddPaymentModule(builder.Configuration);
+
 
 builder.Services
     .AddExceptionHandler<CustomExceptionHandler>();
@@ -50,6 +55,7 @@ app.UseAuthorization();
 app
     .UseCatalogModule()
     .UseBasketModule()
-    .UseOrderingModule();
+    .UseOrderingModule()
+    .UsePaymentModule();
 
 app.Run();
