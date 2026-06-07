@@ -3,10 +3,11 @@ using Payment.Data;
 using Payment.Models;
 using Payment.Payment.Features.ProcessPayment;
 using Shared.Contracts.CQRS;
-
+using MassTransit;
+using Shared.Messaging.Events;
 namespace Payment.Payments.Features.ProcessPayment;
 
-internal class ProcessPaymentHandler(PaymentDbContext dbContext)
+internal class ProcessPaymentHandler(PaymentDbContext dbContext, IPublishEndpoint publishEndpoint)
     : ICommandHandler<ProcessPaymentCommand, ProcessPaymentResult>
 {
     public async Task<ProcessPaymentResult> Handle(ProcessPaymentCommand command, CancellationToken cancellationToken)
@@ -48,6 +49,19 @@ internal class ProcessPaymentHandler(PaymentDbContext dbContext)
 
         // 5. Save the final result to database
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        if (payment.Status == PaymentStatus.Completed)
+        {
+            var eventMessage = new PaymentCompletedEvent
+            {
+                OrderId = payment.OrderId,
+                PaymentId = payment.Id,
+                Amount = payment.Amount
+            };
+
+            // Push to RabbitMQ
+            await publishEndpoint.Publish(eventMessage, cancellationToken);
+        }
 
         return new ProcessPaymentResult(
             payment.Id,
