@@ -10,8 +10,8 @@ services:
     restart: always
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_eshopdb:/var/lib/postgresql/data/
+    # volumes:
+    #   - postgres_eshopdb:/var/lib/postgresql/data/
 
   distributedcache:
     container_name: distributedcache
@@ -23,10 +23,13 @@ services:
     container_name: seq
     environment:
       - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=admin 
     restart: always
     ports:
       - "5341:5341"
       - "9091:80"
+    volumes:
+      - seq_data:/data
 
   messagebus:
     container_name: messagebus
