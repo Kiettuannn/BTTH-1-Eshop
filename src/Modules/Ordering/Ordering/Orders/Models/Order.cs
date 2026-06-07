@@ -9,6 +9,8 @@ public class Order : Aggregate<Guid>
     public Address ShippingAddress { get; private set; } = default!;
     public Address BillingAddress { get; private set; } = default!;
     public Payment Payment { get; private set; } = default!;
+
+    public OrderStatus Status { get; private set; } = OrderStatus.Pending;
     public decimal TotalPrice => Items.Sum(x => x.Price * x.Quantity);
 
     public static Order Create(Guid id, Guid customerId, string orderName, Address shippingAddress, Address billingAddress, Payment payment)
@@ -20,7 +22,8 @@ public class Order : Aggregate<Guid>
             OrderName = orderName,
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
-            Payment = payment
+            Payment = payment,
+            Status = OrderStatus.Pending
         };
 
         order.AddDomainEvent(new OrderCreatedEvent(order));
@@ -53,5 +56,15 @@ public class Order : Aggregate<Guid>
         {
             _items.Remove(orderItem);
         }
+    }
+
+    public void MarkAsPaid()
+    {
+        if (Status != OrderStatus.Pending)
+        {
+            throw new InvalidOperationException("Oder payment when pending");
+        }
+
+        Status = OrderStatus.Paid;
     }
 }
