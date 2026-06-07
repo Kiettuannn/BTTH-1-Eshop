@@ -30,6 +30,7 @@ public class BasketCheckoutIntegrationEventHandler
             ShippingAddress: addressDto,
             BillingAddress: addressDto,
             Payment: paymentDto,
+            Status: OrderStatus.Pending,
             Items:
             [
                 new OrderItemDto(orderId, new Guid("5334c996-8457-4cf0-815c-ed2b77c4ff61"), 2, 500),

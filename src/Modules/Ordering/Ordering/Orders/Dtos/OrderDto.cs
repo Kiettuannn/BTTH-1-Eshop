@@ -6,5 +6,6 @@ public record OrderDto(
     AddressDto ShippingAddress,
     AddressDto BillingAddress,
     PaymentDto Payment,
-    List<OrderItemDto> Items
+    List<OrderItemDto> Items,
+    OrderStatus Status
     );
